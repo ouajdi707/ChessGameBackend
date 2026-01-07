@@ -182,5 +182,126 @@ public class ChessMoveValidator {
         
         return validMoves;
     }
+
+    /**
+     * Check if a king is in check
+     * @param board Current board state
+     * @param isWhiteKing True if checking white king, false for black king
+     * @return True if king is in check
+     */
+    public boolean isKingInCheck(String[][] board, boolean isWhiteKing) {
+        // Find the king's position
+        String kingPiece = isWhiteKing ? "♔" : "♚";
+        int kingRow = -1, kingCol = -1;
+        
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                if (kingPiece.equals(board[row][col])) {
+                    kingRow = row;
+                    kingCol = col;
+                    break;
+                }
+            }
+            if (kingRow != -1) break;
+        }
+        
+        if (kingRow == -1) {
+            // King not found (shouldn't happen in normal game)
+            return false;
+        }
+        
+        // Check if any opponent piece can attack the king
+        boolean opponentIsWhite = !isWhiteKing;
+        
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                String piece = board[row][col];
+                if (piece != null && !piece.isEmpty()) {
+                    boolean pieceIsWhite = isWhitePiece(piece);
+                    if (pieceIsWhite == opponentIsWhite) {
+                        // This is an opponent piece, check if it can attack the king
+                        String fromSquare = positionToSquare(row, col);
+                        String toSquare = positionToSquare(kingRow, kingCol);
+                        if (isValidMove(fromSquare, toSquare, board, opponentIsWhite)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Check if a player is in checkmate
+     * @param board Current board state
+     * @param isWhiteTurn True if checking white player, false for black player
+     * @return True if player is in checkmate
+     */
+    public boolean isCheckmate(String[][] board, boolean isWhiteTurn) {
+        // First check if king is in check
+        if (!isKingInCheck(board, isWhiteTurn)) {
+            return false;
+        }
+        
+        // If in check, see if there are any legal moves that can get out of check
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                String piece = board[row][col];
+                if (piece != null && !piece.isEmpty()) {
+                    boolean pieceIsWhite = isWhitePiece(piece);
+                    if (pieceIsWhite == isWhiteTurn) {
+                        // This is a piece of the player in check
+                        String fromSquare = positionToSquare(row, col);
+                        List<String> validMoves = getValidMoves(fromSquare, board, isWhiteTurn);
+                        
+                        // Try each valid move to see if it gets out of check
+                        for (String toSquare : validMoves) {
+                            // Make a test move
+                            String[][] testBoard = copyBoard(board);
+                            int fromRow = 8 - Integer.parseInt(fromSquare.substring(1));
+                            int fromCol = fromSquare.charAt(0) - 'a';
+                            int toRow = 8 - Integer.parseInt(toSquare.substring(1));
+                            int toCol = toSquare.charAt(0) - 'a';
+                            
+                            String movingPiece = testBoard[fromRow][fromCol];
+                            testBoard[fromRow][fromCol] = null;
+                            testBoard[toRow][toCol] = movingPiece;
+                            
+                            // Check if king is still in check after this move
+                            if (!isKingInCheck(testBoard, isWhiteTurn)) {
+                                // Found a move that gets out of check, so not checkmate
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // No legal moves can get out of check, so it's checkmate
+        return true;
+    }
+
+    /**
+     * Convert board position to square notation (e.g., 0,0 -> "a8")
+     */
+    private String positionToSquare(int row, int col) {
+        char file = (char) ('a' + col);
+        int rank = 8 - row;
+        return "" + file + rank;
+    }
+
+    /**
+     * Create a deep copy of the board
+     */
+    private String[][] copyBoard(String[][] board) {
+        String[][] copy = new String[8][8];
+        for (int i = 0; i < 8; i++) {
+            System.arraycopy(board[i], 0, copy[i], 0, 8);
+        }
+        return copy;
+    }
 }
 

@@ -30,7 +30,7 @@ public class GameController {
     private SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/{gameId}")
-    public ResponseEntity<?> getGame(@PathVariable Long gameId) {
+    public ResponseEntity<Map<String, Object>> getGame(@PathVariable Long gameId) {
         Game game = gameRepository.findById(gameId)
                 .orElse(null);
         if (game == null) {
@@ -42,12 +42,15 @@ public class GameController {
         response.put("player1", game.getPlayer1().getUsername());
         response.put("player2", game.getPlayer2().getUsername());
         response.put("status", game.getStatus().toString());
-        response.put("currentPlayer", game.getCurrentPlayer() != null ? game.getCurrentPlayer().getUsername() : game.getPlayer1().getUsername());
+        response.put("currentPlayer", game.getCurrentPlayer() != null ? game.getCurrentPlayer().getUsername() : null);
+        if (game.getWinner() != null) {
+            response.put("winner", game.getWinner().getUsername());
+        }
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/active/{username}")
-    public ResponseEntity<?> getActiveGame(@PathVariable String username) {
+    public ResponseEntity<Map<String, Object>> getActiveGame(@PathVariable String username) {
         Long gameId = activeGameService.getActiveGame(username);
         if (gameId != null) {
             Map<String, Object> response = new HashMap<>();
@@ -58,7 +61,7 @@ public class GameController {
     }
 
     @PostMapping("/{gameId}/quit")
-    public ResponseEntity<?> quitGame(@PathVariable Long gameId, @RequestParam String username) {
+    public ResponseEntity<Map<String, Object>> quitGame(@PathVariable Long gameId, @RequestParam String username) {
         Game game = gameRepository.findById(gameId)
                 .orElse(null);
         if (game == null) {

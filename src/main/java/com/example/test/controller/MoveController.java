@@ -2,7 +2,9 @@ package com.example.test.controller;
 
 import com.example.test.dto.MoveRequest;
 import com.example.test.dto.MoveResponse;
+import com.example.test.entity.Game;
 import com.example.test.entity.Move;
+import com.example.test.repository.GameRepository;
 import com.example.test.service.BoardService;
 import com.example.test.service.ChessMoveValidator;
 import com.example.test.service.MoveService;
@@ -33,8 +35,11 @@ public class MoveController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    @Autowired
+    private GameRepository gameRepository;
+
     @PostMapping
-    public ResponseEntity<?> makeMove(@RequestBody MoveRequest request) {
+    public ResponseEntity<MoveResponse> makeMove(@RequestBody MoveRequest request) {
         try {
             Move move = moveService.makeMove(
                     request.getGameId(),
@@ -42,6 +47,10 @@ public class MoveController {
                     request.getFromSquare(),
                     request.getToSquare()
             );
+
+            // Reload game to get updated status
+            Game game = gameRepository.findById(request.getGameId())
+                    .orElseThrow(() -> new RuntimeException("Game not found"));
 
             MoveResponse response = new MoveResponse();
             response.setMoveId(move.getId());
@@ -51,7 +60,16 @@ public class MoveController {
             response.setToSquare(move.getToSquare());
             response.setMoveNumber(move.getMoveNumber());
             response.setValid(true);
-            response.setMessage("Move successful");
+            response.setGameStatus(game.getStatus().toString());
+            
+            // Check if game is finished (checkmate)
+            if (game.getStatus() == Game.GameStatus.FINISHED && game.getWinner() != null) {
+                response.setCheckmate(true);
+                response.setWinner(game.getWinner().getUsername());
+                response.setMessage("Checkmate! " + game.getWinner().getUsername() + " wins!");
+            } else {
+                response.setMessage("Move successful");
+            }
 
             // Broadcast move to all players in the game
             messagingTemplate.convertAndSend("/topic/game/" + request.getGameId(), response);
@@ -81,7 +99,7 @@ public class MoveController {
     }
 
     @GetMapping("/valid/{gameId}")
-    public ResponseEntity<?> getValidMoves(
+    public ResponseEntity<Map<String, Object>> getValidMoves(
             @PathVariable Long gameId,
             @RequestParam String fromSquare,
             @RequestParam String username) {

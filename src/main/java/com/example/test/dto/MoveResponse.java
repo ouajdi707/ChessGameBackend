@@ -9,6 +9,9 @@ public class MoveResponse {
     private Integer moveNumber;
     private String message;
     private boolean valid;
+    private String gameStatus; // ACTIVE, FINISHED, ABANDONED
+    private String winner; // Winner username if game is finished
+    private boolean isCheckmate; // True if this move resulted in checkmate
 
     public MoveResponse() {
     }
@@ -80,6 +83,30 @@ public class MoveResponse {
 
     public void setValid(boolean valid) {
         this.valid = valid;
+    }
+
+    public String getGameStatus() {
+        return gameStatus;
+    }
+
+    public void setGameStatus(String gameStatus) {
+        this.gameStatus = gameStatus;
+    }
+
+    public String getWinner() {
+        return winner;
+    }
+
+    public void setWinner(String winner) {
+        this.winner = winner;
+    }
+
+    public boolean isCheckmate() {
+        return isCheckmate;
+    }
+
+    public void setCheckmate(boolean isCheckmate) {
+        this.isCheckmate = isCheckmate;
     }
 }
 

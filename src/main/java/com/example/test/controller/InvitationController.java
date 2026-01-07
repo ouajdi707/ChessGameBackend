@@ -32,7 +32,7 @@ public class InvitationController {
     private SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/send")
-    public ResponseEntity<?> sendInvitation(@RequestBody InvitationRequest request) {
+    public ResponseEntity<InvitationResponse> sendInvitation(@RequestBody InvitationRequest request) {
         if (!onlineUserService.isUserOnline(request.getToUsername())) {
             return ResponseEntity.badRequest()
                     .body(new InvitationResponse("ERROR", request.getFromUsername(), 
@@ -59,7 +59,7 @@ public class InvitationController {
     }
 
     @PostMapping("/accept")
-    public ResponseEntity<?> acceptInvitation(@RequestBody InvitationRequest request) {
+    public ResponseEntity<InvitationResponse> acceptInvitation(@RequestBody InvitationRequest request) {
         // Remove pending invitation for both players
         invitationService.removePendingInvitation(request.getToUsername());
         invitationService.removePendingInvitation(request.getFromUsername());
@@ -93,7 +93,7 @@ public class InvitationController {
     }
 
     @PostMapping("/decline")
-    public ResponseEntity<?> declineInvitation(@RequestBody InvitationRequest request) {
+    public ResponseEntity<InvitationResponse> declineInvitation(@RequestBody InvitationRequest request) {
         // Remove pending invitation
         invitationService.removePendingInvitation(request.getToUsername());
         
@@ -121,7 +121,7 @@ public class InvitationController {
     }
 
     @DeleteMapping("/pending/{username}")
-    public ResponseEntity<?> clearPendingInvitation(@PathVariable String username) {
+    public ResponseEntity<Void> clearPendingInvitation(@PathVariable String username) {
         invitationService.removePendingInvitation(username);
         return ResponseEntity.ok().build();
     }

@@ -26,6 +26,10 @@ public class Game {
     @JoinColumn(name = "current_player_id")
     private User currentPlayer; // Whose turn it is
 
+    @ManyToOne
+    @JoinColumn(name = "winner_id")
+    private User winner; // Winner of the game (if finished)
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -95,6 +99,14 @@ public class Game {
 
     public void setCurrentPlayer(User currentPlayer) {
         this.currentPlayer = currentPlayer;
+    }
+
+    public User getWinner() {
+        return winner;
+    }
+
+    public void setWinner(User winner) {
+        this.winner = winner;
     }
 
     public enum GameStatus {

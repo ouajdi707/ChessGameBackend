@@ -49,5 +49,13 @@ public class BoardService {
     public boolean isWhiteTurn(int moveCount) {
         return moveCount % 2 == 0; // Even moves = white, odd = black
     }
+
+    public String[][] copyBoard(String[][] board) {
+        String[][] copy = new String[8][8];
+        for (int i = 0; i < 8; i++) {
+            System.arraycopy(board[i], 0, copy[i], 0, 8);
+        }
+        return copy;
+    }
 }
 

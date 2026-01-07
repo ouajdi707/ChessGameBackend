@@ -32,13 +32,13 @@ public class UserController {
     }
 
     @PostMapping("/online/{username}")
-    public ResponseEntity<?> setUserOnline(@PathVariable String username) {
+    public ResponseEntity<Void> setUserOnline(@PathVariable String username) {
         onlineUserService.addUser(username);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/online/{username}")
-    public ResponseEntity<?> setUserOffline(@PathVariable String username) {
+    public ResponseEntity<Void> setUserOffline(@PathVariable String username) {
         onlineUserService.removeUser(username);
         return ResponseEntity.ok().build();
     }

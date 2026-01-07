@@ -38,6 +38,14 @@ public class AuthController {
                 return ResponseEntity.badRequest()
                         .body(new AuthResponse(null, null, "Password is required"));
             }
+            if (request.getPassword().length() < 6) {
+                return ResponseEntity.badRequest()
+                        .body(new AuthResponse(null, null, "Password must be at least 6 characters"));
+            }
+            if (!request.getPassword().matches(".*[a-zA-Z].*")) {
+                return ResponseEntity.badRequest()
+                        .body(new AuthResponse(null, null, "Password must contain at least one letter"));
+            }
 
             // Register user
             User user = userService.registerUser(
